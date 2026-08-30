@@ -1,8 +1,8 @@
 .venv/
 __pycache__/
 *.py[cod]
-data/
-dataset/
+/data/
+/dataset/
 models/checkpoints/
 models/checkpoints_old/
 models/preprocessing/
