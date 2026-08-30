@@ -23,6 +23,23 @@ def predict(model, normalizer, imu, initial_speed, device):
             int(output["motion_logits"].argmax(dim=1).item()))
 
 
+def predict_many(model, normalizer, imu, initial_speed, device, batch_size=512):
+    """Batched one-window inference for practical held-out evaluation."""
+    x = normalizer.transform_imu(np.asarray(imu, dtype=np.float32)).astype(np.float32)
+    state = normalizer.transform_speed(np.asarray(initial_speed, dtype=np.float32)).astype(np.float32)
+    speeds, positions, yaws, motions = [], [], [], []
+    with torch.no_grad():
+        for start in range(0, len(x), batch_size):
+            end = start + batch_size
+            output = model(torch.from_numpy(x[start:end]).to(device), torch.from_numpy(state[start:end]).to(device))
+            speeds.append(output["speed"].cpu().numpy())
+            positions.append(output["position"].cpu().numpy())
+            yaws.append(output["yaw_rate"].cpu().numpy())
+            motions.append(output["motion_logits"].argmax(dim=1).cpu().numpy())
+    return (normalizer.inverse_speed(np.concatenate(speeds)), normalizer.inverse_position(np.concatenate(positions)),
+            normalizer.inverse_yaw(np.concatenate(yaws)), np.concatenate(motions))
+
+
 def closed_loop_metrics(model, normalizer, imu, targets, device, horizon_seconds, window_size=20):
     imu = np.asarray(imu, dtype=np.float32)
     duration = (window_size - 1) / 10.0
@@ -31,32 +48,31 @@ def closed_loop_metrics(model, normalizer, imu, targets, device, horizon_seconds
     north = targets["position_north_m"].to_numpy()
     heading = targets["heading_deg"].to_numpy()
     speed = targets["speed_mps"].to_numpy()
-    anchors = range(0, len(imu) - steps * window_size + 1, window_size)
-    final_errors, mean_errors, heading_errors = [], [], []
-    for anchor in anchors:
-        pe, pn, ph, ps = east[anchor], north[anchor], heading[anchor], speed[anchor]
-        errors = []
-        for step in range(steps):
-            start = anchor + step * window_size
-            pred_speed, delta, yaw, _ = predict(model, normalizer, imu[start:start + window_size], ps, device)
-            theta = np.radians(ph)
-            pe += delta[0] * np.sin(theta) + delta[1] * np.cos(theta)
-            pn += delta[0] * np.cos(theta) - delta[1] * np.sin(theta)
-            ph += np.degrees(yaw * duration); ps = max(0.0, pred_speed)
-            end = start + window_size - 1
-            errors.append(float(np.hypot(pe - east[end], pn - north[end])))
-        if errors:
-            final_errors.append(errors[-1]); mean_errors.append(float(np.mean(errors)))
-            actual_heading = heading[anchor + steps * window_size - 1]
-            heading_errors.append(float(abs((ph - actual_heading + 180) % 360 - 180)))
-    return {"windows": len(final_errors), "final_position_error_m": float(np.mean(final_errors)) if final_errors else None,
-            "mean_position_error_m": float(np.mean(mean_errors)) if mean_errors else None,
-            "final_heading_error_deg": float(np.mean(heading_errors)) if heading_errors else None}
+    anchors = np.arange(0, len(imu) - steps * window_size + 1, window_size, dtype=np.int64)
+    if not len(anchors):
+        return {"windows": 0, "final_position_error_m": None, "mean_position_error_m": None, "final_heading_error_deg": None}
+    pe, pn, ph, ps = east[anchors].copy(), north[anchors].copy(), heading[anchors].copy(), speed[anchors].copy()
+    accumulated_error = np.zeros(len(anchors), dtype=np.float64)
+    for step in range(steps):
+        starts = anchors + step * window_size
+        windows = np.stack([imu[start:start + window_size] for start in starts])
+        pred_speed, delta, yaw, _ = predict_many(model, normalizer, windows, ps, device)
+        theta = np.radians(ph)
+        pe += delta[:, 0] * np.sin(theta) + delta[:, 1] * np.cos(theta)
+        pn += delta[:, 0] * np.cos(theta) - delta[:, 1] * np.sin(theta)
+        ph += np.degrees(yaw * duration); ps = np.maximum(0.0, pred_speed)
+        end = starts + window_size - 1
+        accumulated_error += np.hypot(pe - east[end], pn - north[end])
+    final_error = np.hypot(pe - east[end], pn - north[end])
+    heading_error = np.abs((ph - heading[end] + 180) % 360 - 180)
+    return {"windows": int(len(anchors)), "final_position_error_m": float(final_error.mean()),
+            "mean_position_error_m": float((accumulated_error / steps).mean()), "final_heading_error_deg": float(heading_error.mean())}
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment", default="v7_state_turn_aware")
+    parser.add_argument("--skip-trajectory", action="store_true")
     args = parser.parse_args()
     checkpoint_path = Path("models/checkpoints") / args.experiment / "best_model.pt"
     if not checkpoint_path.exists(): raise FileNotFoundError(f"Missing V7 checkpoint: {checkpoint_path}")
@@ -70,10 +86,7 @@ def main():
         imu_df, target_df = prepare_session(dataset, session)
         raw_imu = imu_df.to_numpy(dtype=np.float32)
         windows = build_v7_windows(raw_imu, target_df)
-        sp, pp, yp, mp = [], [], [], []
-        for x, state in zip(windows["imu"], windows["initial_speed"]):
-            a, b, c, d = predict(model, normalizer, x, state, device); sp.append(a); pp.append(b); yp.append(c); mp.append(d)
-        pp, sp, yp, mp = np.asarray(pp), np.asarray(sp), np.asarray(yp), np.asarray(mp)
+        sp, pp, yp, mp = predict_many(model, normalizer, windows["imu"], windows["initial_speed"], device)
         position_error = pp - windows["position"]
         per_session[session["session_id"]] = {"samples": len(pp), "forward_mae_m": float(np.abs(position_error[:, 0]).mean()),
             "lateral_mae_m": float(np.abs(position_error[:, 1]).mean()), "motion_accuracy": float((mp == windows["motion"]).mean())}
@@ -86,10 +99,11 @@ def main():
               "forward_mae_m": float(np.abs(position_error[:, 0]).mean()), "lateral_mae_m": float(np.abs(position_error[:, 1]).mean()),
               "position_rmse_m": float(np.sqrt(np.mean(position_error ** 2))), "yaw_mae_rad_s": float(np.abs(all_pred_yaw - all_windows["yaw_rate"]).mean()),
               "motion_accuracy": float((all_pred_motion == all_windows["motion"]).mean()), "per_session": per_session, "trajectory": {}}
-    for horizon in (10, 20, 30, 60):
-        by_session = {s["session_id"]: closed_loop_metrics(model, normalizer, *prepare_session(dataset, s), device, horizon) for s in sessions}
-        valid = [x["final_position_error_m"] for x in by_session.values() if x["final_position_error_m"] is not None]
-        result["trajectory"][f"{horizon}s"] = {"mean_final_position_error_m": float(np.mean(valid)) if valid else None, "per_session": by_session}
+    if not args.skip_trajectory:
+        for horizon in (10, 20, 30, 60):
+            by_session = {s["session_id"]: closed_loop_metrics(model, normalizer, *prepare_session(dataset, s), device, horizon) for s in sessions}
+            valid = [x["final_position_error_m"] for x in by_session.values() if x["final_position_error_m"] is not None]
+            result["trajectory"][f"{horizon}s"] = {"mean_final_position_error_m": float(np.mean(valid)) if valid else None, "per_session": by_session}
     out = Path("outputs") / args.experiment / "test_results.json"; out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps(result, indent=2))
