@@ -1,0 +1,15 @@
+{
+  "architecture": "V8 state-conditioned with heading-delta target",
+  "seed": 42,
+  "test_set_used_for_selection": false,
+  "class_counts": [
+    36276,
+    181570,
+    37435
+  ],
+  "class_weights": [
+    1.5,
+    1.0,
+    1.5
+  ]
+}
