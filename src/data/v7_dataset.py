@@ -29,6 +29,9 @@ def build_v7_windows(imu, targets, window_size=20, stride=2):
     ends = starts + window_size - 1
     delta_east, delta_north = east[ends] - east[starts], north[ends] - north[starts]
     forward, lateral = global_to_vehicle_frame(delta_east, delta_north, heading[starts])
+    # Wrapped signed heading change across the complete window.  This is a
+    # rollout-compatible target, unlike yaw-rate sampled only at its endpoint.
+    heading_delta = np.radians((heading[ends] - heading[starts] + 180.0) % 360.0 - 180.0)
     return {
         "imu": np.stack([imu[s:s + window_size] for s in starts]).astype(np.float32),
         "speed": speed[ends].astype(np.float32),
@@ -36,6 +39,7 @@ def build_v7_windows(imu, targets, window_size=20, stride=2):
         "mean_speed": np.asarray([speed[s:e + 1].mean() for s, e in zip(starts, ends)], dtype=np.float32),
         "position": np.column_stack([forward, lateral]).astype(np.float32),
         "yaw_rate": yaw[ends].astype(np.float32),
+        "heading_delta": heading_delta.astype(np.float32),
         "motion": motion[ends],
         "start": starts,
         "end": ends,
@@ -75,6 +79,7 @@ class StateConditionedDataset(Dataset):
             "mean_speed": torch.tensor(self.data["mean_speed"][index], dtype=torch.float32),
             "position": torch.from_numpy(self.data["position"][index]),
             "yaw_rate": torch.tensor(self.data["yaw_rate"][index], dtype=torch.float32),
+            "heading_delta": torch.tensor(self.data["heading_delta"][index], dtype=torch.float32),
             "motion": torch.tensor(self.data["motion"][index], dtype=torch.long),
             "session_index": torch.tensor(self.data["session_index"][index], dtype=torch.long),
             "start": torch.tensor(self.data["start"][index], dtype=torch.long),
