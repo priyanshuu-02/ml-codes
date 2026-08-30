@@ -1,0 +1,18 @@
+{
+  "experiment": "v7_state_turn_aware_run3",
+  "seed": 42,
+  "epochs": 35,
+  "batch_size": 128,
+  "architecture": "V7 state-conditioned ConvNeXt-1D + GRU + PatchTST",
+  "class_counts": [
+    36276,
+    181570,
+    37435
+  ],
+  "class_weights": [
+    1.5,
+    1.0,
+    1.5
+  ],
+  "test_set_used_for_selection": false
+}
