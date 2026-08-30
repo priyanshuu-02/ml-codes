@@ -1,0 +1,103 @@
+{
+  "model": "V8 heading-delta",
+  "global": {
+    "samples": 118811,
+    "speed_mae_mps": 0.747829258441925,
+    "speed_rmse_mps": 1.196998119354248,
+    "forward_mae_m": 0.8842948079109192,
+    "forward_rmse_m": 2.1131932735443115,
+    "lateral_mae_m": 0.8152753710746765,
+    "lateral_rmse_m": 1.5440181493759155,
+    "position_rmse_m": 1.8506184816360474,
+    "heading_delta_mae_rad": 0.07097427546977997,
+    "heading_delta_rmse_rad": 0.20134477317333221,
+    "motion_accuracy": 0.8112127664946849
+  },
+  "per_session": {
+    "M": {
+      "samples": 52978,
+      "speed_mae_mps": 0.9043245911598206,
+      "speed_rmse_mps": 1.4232118129730225,
+      "forward_mae_m": 1.0678189992904663,
+      "forward_rmse_m": 2.055908441543579,
+      "lateral_mae_m": 0.9562934637069702,
+      "lateral_rmse_m": 1.7014058828353882,
+      "position_rmse_m": 1.8870004415512085,
+      "heading_delta_mae_rad": 0.10013560950756073,
+      "heading_delta_rmse_rad": 0.24817295372486115,
+      "motion_accuracy": 0.6728075805051154
+    },
+    "Vfa01": {
+      "samples": 5734,
+      "speed_mae_mps": 0.897170901298523,
+      "speed_rmse_mps": 1.2422317266464233,
+      "forward_mae_m": 0.971688985824585,
+      "forward_rmse_m": 1.3348251581192017,
+      "lateral_mae_m": 1.12096107006073,
+      "lateral_rmse_m": 1.6736774444580078,
+      "position_rmse_m": 1.5137625932693481,
+      "heading_delta_mae_rad": 0.0945679172873497,
+      "heading_delta_rmse_rad": 0.23678740859031677,
+      "motion_accuracy": 0.7868852459016393
+    },
+    "Vfa02": {
+      "samples": 33752,
+      "speed_mae_mps": 0.5427252650260925,
+      "speed_rmse_mps": 0.8226734399795532,
+      "forward_mae_m": 0.7137694954872131,
+      "forward_rmse_m": 2.7390120029449463,
+      "lateral_mae_m": 0.7014860510826111,
+      "lateral_rmse_m": 1.5407726764678955,
+      "position_rmse_m": 2.222179889678955,
+      "heading_delta_mae_rad": 0.03770167753100395,
+      "heading_delta_rmse_rad": 0.11135256290435791,
+      "motion_accuracy": 0.9435885280872245
+    },
+    "Vw2": {
+      "samples": 26347,
+      "speed_mae_mps": 0.6633999943733215,
+      "speed_rmse_mps": 1.0887805223464966,
+      "forward_mae_m": 0.7147006988525391,
+      "forward_rmse_m": 1.2805641889572144,
+      "lateral_mae_m": 0.6109622716903687,
+      "lateral_rmse_m": 1.1308995485305786,
+      "position_rmse_m": 1.2080518007278442,
+      "heading_delta_mae_rad": 0.049826573580503464,
+      "heading_delta_rmse_rad": 0.1757339984178543,
+      "motion_accuracy": 0.9252286787869587
+    }
+  },
+  "motion_class_metrics": {
+    "0": {
+      "samples": 7857,
+      "accuracy": 0.9283441517118493
+    },
+    "1": {
+      "samples": 97939,
+      "accuracy": 0.7932284381094354
+    },
+    "2": {
+      "samples": 13015,
+      "accuracy": 0.8758355743373031
+    }
+  },
+  "motion_confusion_matrix": {
+    "rows_actual_0_1_2": [
+      [
+        7294,
+        21,
+        542
+      ],
+      [
+        1225,
+        77688,
+        19026
+      ],
+      [
+        180,
+        1436,
+        11399
+      ]
+    ]
+  }
+}
