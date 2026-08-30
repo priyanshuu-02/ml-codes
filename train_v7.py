@@ -67,7 +67,7 @@ def main():
     class_weights = np.sqrt(class_counts.max() / np.maximum(class_counts, 1))
     class_weights = np.minimum(class_weights, 1.5)
     model = V7DeadReckoningModel(input_channels=6, conv_dim=96, hidden_dim=128, dropout=0.15).to(device)
-    criterion = V7Loss(class_weights=class_weights)
+    criterion = V7Loss(class_weights=class_weights).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-4, weight_decay=2e-4)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=3, min_lr=1e-6)
     scaler = GradScaler("cuda", enabled=device.type == "cuda")
