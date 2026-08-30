@@ -1,0 +1,27 @@
+{
+    "checkpoint": "models\\checkpoints\\best_model.pt",
+    "best_validation_loss": 1.6774967404095948,
+    "test_samples": 118811,
+    "speed_mae_mps": 3.7576324939727783,
+    "speed_rmse_mps": 5.08203649520874,
+    "forward_mae_m": 7.320950508117676,
+    "lateral_mae_m": 0.9005231857299805,
+    "position_rmse_m": 7.120041847229004,
+    "yaw_mae_rad_s": 0.03773830085992813,
+    "yaw_rmse_rad_s": 0.09245166927576065,
+    "motion_accuracy": 0.8945636346802905,
+    "motion_class_metrics": {
+        "0": {
+            "samples": 7857,
+            "accuracy": 0.7320860379279623
+        },
+        "1": {
+            "samples": 97939,
+            "accuracy": 0.9582393122249564
+        },
+        "2": {
+            "samples": 13015,
+            "accuracy": 0.5134844410295812
+        }
+    }
+}

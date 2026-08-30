@@ -1,0 +1,11 @@
+dataset:
+  name: IO-VNBD
+  root: "data/IO-VNBD/synchronized"
+
+  categorized:
+    enabled: true
+    path: "Categorised IOVNB Dataset"
+
+  uncategorized:
+    enabled: false
+    path: "Uncategorised IOVNB Dataset"

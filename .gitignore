@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+data/
+dataset/
+models/checkpoints/
+models/checkpoints_old/
+models/preprocessing/
+outputs/
+.pytest_cache/

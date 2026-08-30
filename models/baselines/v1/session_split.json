@@ -1,0 +1,42 @@
+{
+    "seed": 42,
+    "total_sessions": 32,
+    "train": [
+        "Vw5",
+        "S3c",
+        "Vta1b",
+        "Vw13",
+        "Vw4",
+        "Vw1",
+        "Vw17",
+        "S4",
+        "Vw15",
+        "Vw10",
+        "Vw14a",
+        "Vta1a",
+        "Vw7",
+        "Vw12",
+        "Vw3",
+        "Vw16a",
+        "Vw9",
+        "S1",
+        "Vw11",
+        "Vw14c",
+        "S2",
+        "Vw14b"
+    ],
+    "validation": [
+        "Vw16b",
+        "S3a",
+        "Vw8",
+        "S3b",
+        "Vw6",
+        "Y1"
+    ],
+    "test": [
+        "Vfa02",
+        "Vw2",
+        "M",
+        "Vfa01"
+    ]
+}
