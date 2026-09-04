@@ -87,34 +87,47 @@ class IOVNBDSynchronizedDataset:
         session_id = S1
         """
 
+        # Pairing is case-insensitive on purpose.
+        #
+        # The dataset is not internally consistent about filename case: the
+        # smartphone file "S-Vta2.csv" is paired with the vehicle file
+        # "V-vta2.csv". Exact string matching therefore silently discarded every
+        # Vta and Vtb session, 40 of the 72 available, which is why split.py
+        # warns that it expected 32 sessions. Those 40 sessions load fine; only
+        # their filename case differed.
         smartphone_files = {}
         vehicle_files = {}
+        display_names = {}
 
         csv_files = self.categorised_root.rglob("*.csv")
 
         for path in csv_files:
 
-            filename = path.name
+            prefix = path.name[:2].upper()
+            key = path.stem[2:].casefold()
 
-            if filename.startswith("S-"):
-                session_id = path.stem[2:]
-                smartphone_files[session_id] = path
+            if prefix == "S-":
+                smartphone_files[key] = path
+                # Prefer the smartphone spelling for the session identifier so
+                # ids stay stable and human readable.
+                display_names[key] = path.stem[2:]
 
-            elif filename.startswith("V-"):
-                session_id = path.stem[2:]
-                vehicle_files[session_id] = path
+            elif prefix == "V-":
+                vehicle_files[key] = path
+                display_names.setdefault(key, path.stem[2:])
 
-        session_ids = sorted(
+        session_keys = sorted(
             set(smartphone_files.keys())
             & set(vehicle_files.keys())
         )
 
         sessions = []
 
-        for session_id in session_ids:
+        for key in session_keys:
 
-            smartphone_path = smartphone_files[session_id]
-            vehicle_path = vehicle_files[session_id]
+            session_id = display_names[key]
+            smartphone_path = smartphone_files[key]
+            vehicle_path = vehicle_files[key]
 
             relative = smartphone_path.relative_to(
                 self.categorised_root

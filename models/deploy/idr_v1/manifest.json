@@ -1,0 +1,66 @@
+{
+  "model": "MARK-V IDR-V1 motion model",
+  "preprocessing_version": "idr-v1",
+  "input": {
+    "imu": [
+      20,
+      6
+    ],
+    "sample_rate_hz": 10,
+    "stride_samples": 2,
+    "window_span_seconds": 1.9,
+    "channels": [
+      "lin_accel_x",
+      "lin_accel_y",
+      "lin_accel_z",
+      "gyro_ch0",
+      "gyro_ch1",
+      "gyro_ch2"
+    ],
+    "frame": "PHONE_LINEAR",
+    "gravity": "REMOVED",
+    "gyro_order": "DATASET_NATIVE",
+    "initial_speed": "last trusted GNSS or DR speed, normalised with normalization.json"
+  },
+  "outputs": [
+    "speed",
+    "speed_log_variance",
+    "acceleration",
+    "acceleration_log_variance",
+    "position",
+    "position_log_variance",
+    "heading_delta",
+    "heading_delta_log_variance",
+    "motion_logits"
+  ],
+  "parameters": 81581,
+  "sha256": "926deef4b98b70b655a915582c4d32a1da3b47496bf162bc92acc81ee2700a88",
+  "selection": "validation only; the test session was never read during training",
+  "trained_epoch": 4,
+  "validation_metrics": {
+    "loss": -13.342059199492084,
+    "forward_mae_m": 0.6982471942901611,
+    "lateral_mae_m": 0.35625720024108887,
+    "heading_mae_rad": 0.043697964400053024,
+    "speed_mae_mps": 0.655133843421936,
+    "acceleration_mae_mps2": 0.4243253171443939,
+    "motion_accuracy": 0.9279426149331594
+  },
+  "training_sessions": [
+    "S3c",
+    "S1",
+    "S2",
+    "M"
+  ],
+  "validation_sessions": [
+    "S3a"
+  ],
+  "test_sessions": [
+    "Y1"
+  ],
+  "known_limitations": [
+    "Trained on 4 sessions from the 6 of 72 whose smartphone IMU demonstrably corresponds to the vehicle log; the remaining 66 are not usable.",
+    "Phone-frame input, so it is not mount independent. A vehicle-frame model is not trainable from IO-VNBD because its gyro columns behave as Euler angle rates rather than a rotatable vector.",
+    "One held-out test session, so generalisation evidence is limited to a single unseen driver and vehicle."
+  ]
+}

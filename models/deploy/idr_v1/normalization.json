@@ -1,0 +1,46 @@
+{
+  "preprocessing_version": "idr-v1",
+  "sample_rate_hz": 10,
+  "window_samples": 20,
+  "stride_samples": 2,
+  "window_span_seconds": 1.9,
+  "channel_names": [
+    "lin_accel_x",
+    "lin_accel_y",
+    "lin_accel_z",
+    "gyro_ch0",
+    "gyro_ch1",
+    "gyro_ch2"
+  ],
+  "frame": "PHONE_LINEAR",
+  "gravity": "REMOVED",
+  "gyro_order": "DATASET_NATIVE",
+  "imu_mean": [
+    -0.06747661530971527,
+    -0.016367189586162567,
+    0.04492831975221634,
+    0.0005335697205737233,
+    -0.011156049557030201,
+    0.0017721847398206592
+  ],
+  "imu_std": [
+    1.1577202081680298,
+    1.1531959772109985,
+    0.596889078617096,
+    0.12071022391319275,
+    0.15322664380073547,
+    0.06817056238651276
+  ],
+  "speed_mean": 9.084269523620605,
+  "speed_std": 6.122361660003662,
+  "acceleration_mean": -0.01629633642733097,
+  "acceleration_std": 0.7676517963409424,
+  "position_mean": [
+    0.0,
+    0.0
+  ],
+  "position_scale": [
+    11.678340911865234,
+    2.0438942909240723
+  ]
+}
