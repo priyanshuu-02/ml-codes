@@ -1,0 +1,7 @@
+{
+  "architecture": "V9 V8 encoder + predicted-state sequence unroll",
+  "sequence_length": 5,
+  "sequence_seconds": 9.5,
+  "trajectory_weight": 0.3,
+  "test_set_used_for_selection": false
+}
